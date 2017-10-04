@@ -1,6 +1,6 @@
 package query_server;
 
-use strict;
+#use strict;
 use Socket;
 
 use server;
@@ -11,7 +11,7 @@ use Messages qw(serialize unserialize);
 our $server;
 our $run_flags = 1;
 
-our @query_table = ();
+our %query_table = ();
 
 sub ragnarok_pre_loop {
     my $ragnarok_client;
@@ -23,11 +23,11 @@ sub ragnarok_pre_loop {
 	}
     }
 
-    foreach my $item (@query_table) {
-	if ($$item[2]) {
-	    $$item[2] = 0;
-	    $$item[3] = $ragnarok_client;
-	    $ragnarok_client->{'wbuf'} .= $$item[1];
+    foreach my $item (values %query_table) {
+	if (!$$item{'time'}) {
+	    $$item{'time'} = time;
+	    $$item{'ragnarok_client'} = $ragnarok_client;
+	    $ragnarok_client->{'wbuf'} .= $$item{'request_data'};
 	    last;
 	}
     }
@@ -38,16 +38,19 @@ sub ragnarok_pre_on_packet {
 
     return unless $switch eq '09D0';
 
-    foreach my $item (@query_table) {
-	if ($$item[3] == $ragnarok_client and !$$item[4]) {
-	    $$item[4] = $ragnarok_client->{'rbuf'};
-	    my %args;
-	    $args{packet} = $$item[4];
-	    $$item[0]->{'wbuf'} = serialize("Poseidon Reply", \%args);
-	    printf("Poseidon Reply: %s => %s\n",
-		   unpack('H*', $$item[1]), unpack('H*', $$item[4]));
-	    last;
-	}
+    while (my ($key, $value) = each %query_table) {
+	next if !$$value{'time'};
+	next if $$value{'ragnarok_client'} != $ragnarok_client;
+
+	$$value{'response_data'} = $ragnarok_client->{'rbuf'};
+	my %args;
+	$args{packet} = $$value{'response_data'};
+	$$value{'session'}->{'wbuf'} = serialize("Poseidon Reply", \%args);
+	printf("Poseidon Reply: %s => %s\n",
+	       unpack('H*', $$value{'request_data'}),
+	       unpack('H*', $$value{'response_data'}));
+	delete $query_table{$key};
+	last;
     }
 }
 
@@ -59,7 +62,13 @@ sub on_packet {
     my $switch = sprintf("%.4X", unpack("v", $args->{'packet'}));
 
     if ($switch eq '09CF') {
-	push(@query_table, [$session, $args->{'packet'}, 1, undef, '']);
+	$query_table{$session} = {
+	    time => 0,
+	    session => $session,
+	    ragnarok_client => undef,
+	    request_data => $args->{'packet'},
+	    response_data => undef,
+	};
 	printf("Poseidon Query: %s\n", unpack("H*", $args->{'packet'}));
     }
 
@@ -72,7 +81,7 @@ sub on_connection {
 }
 
 sub loop {
-    my $timeout = 0.5;
+    my $timeout = 0.2;
     $timeout = $_[0] if $_[0];
     loop_socket::loop($timeout);
 }

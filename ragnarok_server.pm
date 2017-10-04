@@ -127,7 +127,7 @@ sub on_connection {
 }
 
 sub loop {
-    my $timeout = 0.5;
+    my $timeout = 0.2;
     $timeout = $_[0] if $_[0];
 
     $pre_loop->() if $pre_loop;
