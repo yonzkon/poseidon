@@ -46,7 +46,7 @@ sub loop {
             $nfound--;
 
             if ($item->isa('server') and accept(my $fh, $item->filehandle)) {
-                my $client = new socket_raw($fh);
+                my $client = new socket_raw($fh, $item);
                 add($client);
                 if ($item->{'connection'}) {
                     $item->{'connection'}->($client);

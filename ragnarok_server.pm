@@ -1,10 +1,19 @@
 package ragnarok_server;
+
 use strict;
-use server;
-use loop_socket;
 use Socket;
 
-our $packets = {
+use server;
+use loop_socket;
+
+our $server;
+our $run_flags = 1;
+
+our $pre_loop = undef;
+our $post_loop = undef;
+our $pre_on_packet = undef;
+
+our $recv_packets = {
     # login packets
     #'0064' => ['master_login', 'V Z24 Z24 C', [qw(version username password master_version)]],
     '0AAC' => ['master_login', 'V Z30 a32 C', [qw(version username password_hex master_version)]],
@@ -18,6 +27,24 @@ our $packets = {
     # map packets
     '0436' => ['map_login', 'a4 a4 a4 V C', [qw(accountID charID sessionID tick sex)]],
     '007D' => ['map_loaded'], # len 2
+    '0360' => ['sync', 'V', [qw(time)]],
+    '09D0' => ['gameguard_reply'],
+};
+
+our $send_packets = {
+    # login packets
+    '0AC9' => ['account_server_info', 'v a4 a4 a4 a4 a26 C a*', [qw(len sessionID accountID sessionID2 lastLoginIP lastLoginTime accountSex serverInfo)]],
+
+    # char packets
+    '082D' => ['received_characters_info', 'x2 C5 x20', [qw(normal_slot premium_slot billing_slot producible_slot valid_slot)]],
+    '099D' => ['received_characters', 'v a*', [qw(len charInfo)]],
+    '0AC5' => ['received_character_ID_and_Map', 'a4 Z16 a4 v a128', [qw(charID mapName mapIP mapPort mapUrl)]],
+
+    # map packets
+    '02EB' => ['map_loaded', 'V a3 x2 v', [qw(syncMapSync coords unknown)]],
+    '01D7' => ['player_equipment', 'a4 C v2', [qw(sourceID type ID1 ID2)]],
+    '0187' => ['sync_request', 'a4', [qw(ID)]],
+    '09CF' => ['gameguard_request'],
 };
 
 sub master_login {
@@ -25,7 +52,7 @@ sub master_login {
     my $data = pack("H*", "c90acf00343d000056be01000900000000000000acfb87037267400030fc8703d42b6700c82b6700c4fb8703a36a01");
     $session->{'wbuf'} .= $data;
     $data = pack("H*", "0a872e959411c6d5c2a1b5c2c0ad000000000000000000000000ce0c00008032") .
-	pack("a*", "ss.yiend.com:5964\r\n") .
+	pack("a*", "ss.yiend.com:6900\r\n") .
 	pack("H*", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     $session->{'wbuf'} .= $data;
     $session->close;
@@ -54,7 +81,7 @@ sub sync_received_characters {
 sub char_login {
     my $session = shift;
     my $data = pack("H*", "c50a68cd01006765665f66696c6430332e67617400000a87192d1227") .
-	pack("a*", "ss.yiend.com:5964") .
+	pack("a*", "ss.yiend.com:6900") .
 	pack("H*", "0000000000000000") .
 	pack("H*", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     $session->{'wbuf'} .= $data;
@@ -83,10 +110,12 @@ sub on_packet {
     my $session = shift;
     my $switch = sprintf("%.4X", unpack("v", $session->{'rbuf'}));
 
-    if (exists $packets->{"$switch"}) {
-	my $callback = __PACKAGE__->can($packets->{"$switch"}[0]);
+    $pre_on_packet->($session, $switch) if $pre_on_packet;
+
+    if (exists $recv_packets->{"$switch"}) {
+	my $callback = __PACKAGE__->can($recv_packets->{"$switch"}[0]);
 	if ($callback) {
-	    $callback->($session, $packets->{"switch"});
+	    $callback->($session, $recv_packets->{"switch"});
 	}
     }
     $session->{'rbuf'} = '';
@@ -97,14 +126,22 @@ sub on_connection {
     $client->{'packet'} = \&on_packet;
 }
 
-our $server = server::create_server('5964', INADDR_ANY);
-$server->{'connection'} = \&on_connection;
-our $run_flags = 1;
-
 sub loop {
-    loop_socket::loop(0.5);
+    my $timeout = 0.5;
+    $timeout = $_[0] if $_[0];
+
+    $pre_loop->() if $pre_loop;
+    loop_socket::loop($timeout);
+    $post_loop->() if $post_loop;
 }
 
 sub run {
     loop while ($run_flags);
 }
+
+sub init {
+    $server = server::create_server('6900', INADDR_ANY);
+    $server->{'connection'} = \&on_connection;
+}
+
+1;
