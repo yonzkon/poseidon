@@ -24,7 +24,7 @@ sub remove {
 
     if (!$socket->isa('server')) {
         my ($port, $ipaddr) = sockaddr_in(getpeername($socket->filehandle));
-        printf("close client(%d) %s:%d\n", $fd, inet_ntoa($ipaddr), $port);
+        printf("close client(%d) %s:%d\n", $fd, inet_ntoa($ipaddr), $port) if $ipaddr;
     }
 };
 

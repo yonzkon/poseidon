@@ -15,7 +15,7 @@ our %query_table = ();
 
 sub get_ragnarok_client {
     foreach my $item (values %loop_socket::socket_table) {
-	if (!$item->{'charid'} and $item->{'parent'} and
+	if (!$item->eof and !$item->{'charid'} and $item->{'parent'} and
 	    $item->{'parent'} == $ragnarok_server::server) {
 	    $item->{'charid'} = $_[0];
 	    return $item;
@@ -34,16 +34,16 @@ sub ragnarok_pre_on_packet {
     return unless $switch eq '09D0';
 
     while (my ($key, $value) = each %query_table) {
-	next if !$$value{'requested'};
-	next if $$value{'ragnarok_client'} != $ragnarok_client;
+	next if !$value->{'requested'};
+	next if $value->{'ragnarok_client'} != $ragnarok_client;
 
-	$$value{'response_data'} = $ragnarok_client->{'rbuf'};
+	$value->{'response_data'} = $ragnarok_client->{'rbuf'};
 	my %args;
-	$args{packet} = $$value{'response_data'};
-	$$value{'session'}->{'wbuf'} = serialize("Poseidon Reply", \%args);
+	$args{packet} = $value->{'response_data'};
+	$value->{'session'}->{'wbuf'} = serialize("Poseidon Reply", \%args);
 	printf("Poseidon Reply(%s): %s => %s\n", $key,
-	       unpack('H*', $$value{'request_data'}),
-	       unpack('H*', $$value{'response_data'}));
+	       unpack('H*', $value->{'request_data'}),
+	       unpack('H*', $value->{'response_data'}));
 	last;
     }
 }
@@ -51,31 +51,31 @@ sub ragnarok_pre_on_packet {
 sub ragnarok_pre_loop {
     while (my ($key, $value) = each %query_table) {
 	# put ragnarok client if inactived
-	if ($$value{'last_query_time'} + 1800 < time) {
-	    if ($$value{'ragnarok_client'}) {
-		put_ragnarok_client($$value{'ragnarok_client'});
-		$$value{'ragnarok_client'} = undef;
+	if ($value->{'last_query_time'} + 1800 < time) {
+	    if ($value->{'ragnarok_client'}) {
+		put_ragnarok_client($value->{'ragnarok_client'});
+		$value->{'ragnarok_client'} = undef;
 	    }
 	    delete $query_table{$key};
 	    next;
 	}
 
 	# get ragnarok client if actived
-	unless ($$value{'ragnarok_client'}) {
+	if (!$value->{'ragnarok_client'} or $value->{'ragnarok_client'}->eof) {
 	    my $tmp = get_ragnarok_client($key);
 	    if (!$tmp) {
-		$$value{'last_query_time'} = 0;
-		$$value{'session'}->close;
+		$value->{'last_query_time'} = 0;
+		$value->{'session'}->close;
 		print "no free ragnarok-client left!\n";
 		next;
 	    } else {
-		$$value{'ragnarok_client'} = $tmp;
+		$value->{'ragnarok_client'} = $tmp;
 	    }
 	}
 
-	unless ($$value{'requested'}) {
-	    $$value{'requested'} = 1;
-	    $$value{'ragnarok_client'}->{'wbuf'} .= $$value{'request_data'};
+	unless ($value->{'requested'}) {
+	    $value->{'requested'} = 1;
+	    $value->{'ragnarok_client'}->{'wbuf'} .= $value->{'request_data'};
 	}
     }
 }

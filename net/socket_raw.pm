@@ -24,6 +24,10 @@ sub filehandle {
     return $_[0]->{'fh'};
 }
 
+sub eof {
+    return $_[0]->{'eof'};
+}
+
 sub close {
     $_[0]->{'eof'} = 1;
 }
