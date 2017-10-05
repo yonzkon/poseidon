@@ -13,7 +13,7 @@ sub add {
 
     if (!$socket->isa('server')) {
         my ($port, $ipaddr) = sockaddr_in(getpeername($socket->filehandle));
-        printf("accept client(%d) %s:%d\n", $fd, inet_ntoa($ipaddr), $port);
+        printf("accept client(%d) %s:%d\n", $fd, inet_ntoa($ipaddr), $port) if $ipaddr;
     }
 };
 
