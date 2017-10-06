@@ -62,8 +62,8 @@ sub loop {
                     $item->{'connection'}->($client);
                 }
             } elsif ($item->isa('socket_raw')) {
-                my $buffer = '';
-                recv($item->filehandle, $buffer, 1024, 0);
+                $item->{'tick'} = time;
+                recv($item->filehandle, my $buffer, 1024, 0);
                 if ($buffer) {
                     $item->{'rbuf'} .= $buffer;
                     if ($item->{'packet'}) {
@@ -87,6 +87,8 @@ sub loop {
     $nfound = select(undef, undef, my $eout = $ein, 0);
     foreach my $item (values %socket_table) {
         #last if !$nfound;
+        $item->{'eof'} = 1 if !$item->isa('server') and $item->{'tick'}+$item->{'stall'} < time;
+
         if ($item->{'eof'} or vec($eout, fileno($item->filehandle), 1)) {
             remove($item);
             close($item->filehandle);

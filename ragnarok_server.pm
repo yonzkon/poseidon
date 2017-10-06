@@ -3,6 +3,7 @@ package ragnarok_server;
 use strict;
 use Socket;
 
+use socket_raw;
 use server;
 use loop_socket;
 
@@ -52,8 +53,8 @@ sub master_login {
     my $data = pack("H*", "c90acf00343d000056be01000900000000000000acfb87037267400030fc8703d42b6700c82b6700c4fb8703a36a01");
     $session->{'wbuf'} .= $data;
     $data = pack("H*", "0a872e959411c6d5c2a1b5c2c0ad000000000000000000000000ce0c00008032") .
-	pack("a*", "ss.yiend.com:6900\r\n") .
-	pack("H*", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    pack("a*", "ss.yiend.com:6900\r\n") .
+    pack("H*", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     $session->{'wbuf'} .= $data;
     $session->close;
 };
@@ -81,9 +82,9 @@ sub sync_received_characters {
 sub char_login {
     my $session = shift;
     my $data = pack("H*", "c50a68cd01006765665f66696c6430332e67617400000a87192d1227") .
-	pack("a*", "ss.yiend.com:6900") .
-	pack("H*", "0000000000000000") .
-	pack("H*", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    pack("a*", "ss.yiend.com:6900") .
+    pack("H*", "0000000000000000") .
+    pack("H*", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     $session->{'wbuf'} .= $data;
     $session->close;
 };
@@ -113,10 +114,10 @@ sub on_packet {
     $pre_on_packet->($session, $switch) if $pre_on_packet;
 
     if (exists $recv_packets->{"$switch"}) {
-	my $callback = __PACKAGE__->can($recv_packets->{"$switch"}[0]);
-	if ($callback) {
-	    $callback->($session, $recv_packets->{"switch"});
-	}
+        my $callback = __PACKAGE__->can($recv_packets->{"$switch"}[0]);
+        if ($callback) {
+            $callback->($session, $recv_packets->{"switch"});
+        }
     }
     $session->{'rbuf'} = '';
 }
@@ -133,6 +134,12 @@ sub loop {
     $pre_loop->() if $pre_loop;
     loop_socket::loop($timeout);
     $post_loop->() if $post_loop;
+
+    if (time % (socket_raw::STALL_DEFAULT/2) == 0) {
+        foreach my $item (values %loop_socket::socket_table) {
+            $item->{'wbuf'} .= pack('H*', '8701') if $item->{'parent'} == $server;
+        }
+    }
 }
 
 sub run {
