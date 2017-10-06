@@ -12,8 +12,13 @@ sub add {
     $socket_table{$fd} = $socket;
 
     if (!$socket->isa('server')) {
-        my ($port, $ipaddr) = sockaddr_in(getpeername($socket->filehandle));
-        printf("accept client(%d) %s:%d\n", $fd, inet_ntoa($ipaddr), $port) if $ipaddr;
+        my $sockaddr = getpeername($socket->filehandle);
+        if ($sockaddr) {
+            my ($port, $ipaddr) = sockaddr_in($sockaddr);
+            printf("accept client(%d) %s:%d\n", $fd, inet_ntoa($ipaddr), $port);
+        } else {
+            printf("accept cleint(%d) failed to get remote ipaddr!\n");
+        }
     }
 };
 
@@ -23,8 +28,13 @@ sub remove {
     delete $socket_table{"$fd"};
 
     if (!$socket->isa('server')) {
-        my ($port, $ipaddr) = sockaddr_in(getpeername($socket->filehandle));
-        printf("close client(%d) %s:%d\n", $fd, inet_ntoa($ipaddr), $port) if $ipaddr;
+        my $sockaddr = getpeername($socket->filehandle);
+        if ($sockaddr) {
+            my ($port, $ipaddr) = sockaddr_in($sockaddr);
+            printf("close client(%d) %s:%d\n", $fd, inet_ntoa($ipaddr), $port);
+        } else {
+            printf("close cleint(%d) failed to get remote ipaddr!\n");
+        }
     }
 };
 
@@ -80,6 +90,8 @@ sub loop {
         if ($item->{'eof'} or vec($eout, fileno($item->filehandle), 1)) {
             remove($item);
             close($item->filehandle);
+            # FIXME: ungly delete in foreach
+            last;
         }
     }
 };
