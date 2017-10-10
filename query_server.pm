@@ -1,6 +1,6 @@
 package query_server;
 
-#use strict;
+use strict;
 use Socket;
 
 use server;
@@ -88,7 +88,7 @@ sub on_packet {
     my $switch = sprintf("%.4X", unpack("v", $args->{'packet'}));
 
     if ($switch eq '09CF' && $args->{'charid'}) {
-    $charid = unpack('H*', $args->{'charid'});
+    my $charid = unpack('H*', $args->{'charid'});
 
     unless (exists $query_table{"$charid"}) {
         $query_table{"$charid"} = {
