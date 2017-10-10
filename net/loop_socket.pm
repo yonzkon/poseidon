@@ -55,7 +55,7 @@ sub loop {
         if (vec($rout, fileno($item->filehandle), 1)) {
             $nfound--;
 
-            if ($item->isa('server') and accept(my $fh, $item->filehandle)) {
+            if ($item->isa('server') && accept(my $fh, $item->filehandle)) {
                 my $client = new socket_raw($fh, $item);
                 add($client);
                 if ($item->{'connection'}) {
@@ -87,9 +87,9 @@ sub loop {
     $nfound = select(undef, undef, my $eout = $ein, 0);
     foreach my $item (values %socket_table) {
         #last if !$nfound;
-        $item->{'eof'} = 1 if !$item->isa('server') and $item->{'tick'}+$item->{'stall'} < time;
+        $item->{'eof'} = 1 if !$item->isa('server') && $item->{'tick'}+$item->{'stall'} < time;
 
-        if ($item->{'eof'} or vec($eout, fileno($item->filehandle), 1)) {
+        if ($item->{'eof'} || vec($eout, fileno($item->filehandle), 1)) {
             remove($item);
             close($item->filehandle);
             # FIXME: ungly delete in foreach

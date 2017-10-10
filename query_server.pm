@@ -15,7 +15,7 @@ our %query_table = ();
 
 sub get_ragnarok_client {
     foreach my $item (values %loop_socket::socket_table) {
-        if (!$item->eof and !$item->{'charid'} and $item->{'parent'} and
+        if (!$item->eof && !$item->{'charid'} && $item->{'parent'} &&
             $item->{'parent'} == $ragnarok_server::server) {
             $item->{'charid'} = $_[0];
             return $item;
@@ -61,7 +61,7 @@ sub ragnarok_pre_loop {
         }
 
         # get ragnarok client if actived
-        if (!$value->{'ragnarok_client'} or $value->{'ragnarok_client'}->eof) {
+        if (!$value->{'ragnarok_client'} || $value->{'ragnarok_client'}->eof) {
             my $tmp = get_ragnarok_client($key);
             if (!$tmp) {
             $value->{'last_query_time'} = 0;
@@ -87,7 +87,7 @@ sub on_packet {
     my $args = unserialize($session->{'rbuf'}, $ID);
     my $switch = sprintf("%.4X", unpack("v", $args->{'packet'}));
 
-    if ($switch eq '09CF' and $args->{'charid'}) {
+    if ($switch eq '09CF' && $args->{'charid'}) {
     $charid = unpack('H*', $args->{'charid'});
 
     unless (exists $query_table{"$charid"}) {

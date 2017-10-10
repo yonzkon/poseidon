@@ -16,9 +16,12 @@ sub new {
 sub create_server {
     my ($port, $ipaddr) = @_;
 
-    socket(my $fh, AF_INET, SOCK_STREAM, 0) or return undef;
-    bind($fh, sockaddr_in($port, $ipaddr)) or (close($fh) and return undef);
-    listen($fh, 100) or (close($fh) and return undef);
+    socket(my $fh, AF_INET, SOCK_STREAM, 0) ||
+	return undef;
+    bind($fh, sockaddr_in($port, $ipaddr)) ||
+	(close($fh) && return undef);
+    listen($fh, 100) ||
+	(close($fh) && return undef);
 
     my $server = new server($fh);
     loop_socket::add($server);
