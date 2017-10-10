@@ -14,6 +14,6 @@ ragnarok_server::init;
 query_server::init;
 
 while (1) {
-    ragnarok_server::loop(0);
-    query_server::loop(0.1);
+	ragnarok_server::loop(0);
+	query_server::loop(0.1);
 }
