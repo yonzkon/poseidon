@@ -46,6 +46,7 @@ our $send_packets = {
 	'01D7' => ['player_equipment', 'a4 C v2', [qw(sourceID type ID1 ID2)]],
 	'0187' => ['sync_request', 'a4', [qw(ID)]],
 	'09CF' => ['gameguard_request'],
+	'007E' => ['sync', 'V', [qw(time)]],
 };
 
 sub master_login {
@@ -107,6 +108,12 @@ sub map_login {
 sub map_loaded {
 };
 
+sub sync {
+	my $session = shift;
+	$session->{'wbuf'} .= pack("H*", "7e0000000000");
+	#$session->{'wbuf'} .= pack('H*', '870156be0100');
+}
+
 sub on_packet {
 	my $session = shift;
 	my $switch = sprintf("%.4X", unpack("v", $session->{'rbuf'}));
@@ -135,11 +142,12 @@ sub loop {
 	loop_socket::loop($timeout);
 	$post_loop->() if $post_loop;
 
-	if (time % (socket_raw::STALL_DEFAULT/2) == 0) {
-		foreach my $item (values %loop_socket::socket_table) {
-			$item->{'wbuf'} .= pack('H*', '8701') if $item->{'parent'} == $server;
-		}
-	}
+	#if (time % (socket_raw::STALL_DEFAULT/2) == 0) {
+	#	foreach my $item (values %loop_socket::socket_table) {
+	#		$item->{'wbuf'} .= pack('H*', '870156be0100') if $item->{'parent'} == $server;
+	#	}
+	#	sleep(1);
+	#}
 }
 
 sub run {
