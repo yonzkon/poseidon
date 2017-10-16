@@ -14,6 +14,9 @@ our $pre_loop = undef;
 our $post_loop = undef;
 our $pre_on_packet = undef;
 
+our $char_server = '127.0.0.1:6900';
+our $map_server = '127.0.0.1:6900';
+
 our $recv_packets = {
 	# login packets
 	#'0064' => ['master_login', 'V Z24 Z24 C', [qw(version username password master_version)]],
@@ -53,9 +56,11 @@ sub master_login {
 	my $session = shift;
 	my $data = pack("H*", "c90acf00343d0000cccccccc0900000000000000acfb87037267400030fc8703d42b6700c82b6700c4fb8703a36a01");
 	$session->{'wbuf'} .= $data;
-	$data = pack("H*", "0a872e959411c6d5c2a1b5c2c0ad000000000000000000000000ce0c00008032") .
-	pack("a*", "poseidon.yiend.com:6900\r\n") .
-	pack("H*", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+
+	my $padlen = (128-length($char_server . "\r\n"))*2;
+	$data = pack("H*", "0a872e959411c6d5c2a1b5c2c0ad000000000000000000000000ce0c00008032");
+	$data .= pack("a*", $char_server . "\r\n");
+	$data .= pack("H*", sprintf("%0${padlen}d", 0));
 	$session->{'wbuf'} .= $data;
 	$session->close;
 };
@@ -82,10 +87,12 @@ sub sync_received_characters {
 
 sub char_login {
 	my $session = shift;
-	my $data = pack("H*", "c50aeeeeeeee6765665f66696c6430332e67617400000a87192d1227") .
-	pack("a*", "poseidon.yiend.com:6900") .
-	pack("H*", "0000") .
-	pack("H*", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+
+	my $padlen = (128-length($map_server . "\r\n"))*2;
+	my $data = pack("H*", "c50aeeeeeeee6765665f66696c6430332e67617400000a87192d1227");
+	$data .= pack("a*", $map_server . "\r\n");
+	$data .= pack("H*", sprintf("%0${padlen}d", 0));
+
 	$session->{'wbuf'} .= $data;
 	$session->close;
 };
@@ -155,7 +162,7 @@ sub run {
 }
 
 sub init {
-	$server = server::create_server('6900', INADDR_ANY);
+	$server = server::create_server($_[0], INADDR_ANY);
 	$server->{'connection'} = \&on_connection;
 }
 

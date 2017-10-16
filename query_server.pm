@@ -129,7 +129,7 @@ sub run {
 }
 
 sub init {
-	$server = server::create_server('24390', INADDR_ANY);
+	$server = server::create_server($_[0], INADDR_ANY);
 	$server->{'connection'} = \&on_connection;
 
 	$ragnarok_server::pre_loop = \&ragnarok_pre_loop;
