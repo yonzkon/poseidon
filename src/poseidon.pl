@@ -1,11 +1,17 @@
 #!/usr/bin/env perl
 
-BEGIN{push(@INC, ".")};
-BEGIN{push(@INC, "./net")};
-
 package main;
 use strict;
 use Getopt::Long;
+
+BEGIN {
+	use File::Basename;
+	use File::Spec;
+	my $dir = dirname(File::Spec->rel2abs(__FILE__));
+	push(@INC, "$dir");
+	push(@INC, "$dir/net");
+}
+
 use ragnarok_server;
 use query_server;
 
