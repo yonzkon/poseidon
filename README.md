@@ -1,8 +1,21 @@
 # Poseidon
-poseidon only for openkore-cro
+Poseidon server only for openkore-cro
 
-Use --char-server and --map-server to specify your server.
+# steps to use openkore-cro and Poseidon
 
-./poseidon.pl --char-server=poseidon.yiend.com:6900 --map-server=poseidon.yiend.com:6900
+## STEP 1 - Capture your encrypted password (32 bytes)
+![image](https://github.com/yon2kong/Poseidon/blob/master/doc/password.png)
 
-Or poseidon will use '127.0.0.1:6900' as default.
+## STEP 2 - Run Poseidon in VM or VPS
+- ./poseidon.pl --char-server=\<YOUR VM IP:6900\> --map-server=\<YOUR VM IP:6900\>
+
+## STEP 3 - Make poseidon.xml AND start Ragnarok Client (Ragexe)
+- http://openkore.com/index.php/Poseidon
+- Checkout Poseidon's output.
+
+![image](https://github.com/yon2kong/Poseidon/blob/master/doc/poseidon2.png)
+
+## SETP 4 - Start OpenKore
+- Checkout Poseidon's output.
+
+![image](https://github.com/yon2kong/Poseidon/blob/master/doc/poseidon3.png)
