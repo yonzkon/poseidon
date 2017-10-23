@@ -6,16 +6,19 @@ Poseidon server only for openkore-cro
 ## STEP 1 - Capture the login password which is encrypted in rijndael (32 bytes)
 ![image](https://github.com/yon2kong/Poseidon/blob/master/doc/password.png)
 
-## STEP 2 - Run Poseidon in your VM or VPS
+## STEP 2 - Config your control/config.txt
+![image](https://github.com/yon2kong/Poseidon/blob/master/doc/config.png)
+
+## STEP 3 - Run Poseidon in your VM or VPS
 - ./poseidon.pl --char-server=\<YOUR VM IP:6900\> --map-server=\<YOUR VM IP:6900\>
 
-## STEP 3 - Make poseidon.xml AND start Ragnarok Client (Ragexe)
+## STEP 4 - Make poseidon.xml AND start Ragnarok Client (Ragexe)
 - http://openkore.com/index.php/Poseidon
 - Check Poseidon's output.
 
 ![image](https://github.com/yon2kong/Poseidon/blob/master/doc/poseidon2.png)
 
-## SETP 4 - Start OpenKore
+## SETP 5 - Start OpenKore
 - Check Poseidon's output.
 
 ![image](https://github.com/yon2kong/Poseidon/blob/master/doc/poseidon3.png)
