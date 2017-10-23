@@ -18,7 +18,9 @@ Poseidon server only for openkore-cro
 
 ![image](https://github.com/yon2kong/Poseidon/blob/master/doc/poseidon2.png)
 
-## SETP 5 - Start OpenKore
-- Check Poseidon's output.
+## SETP 5 - Checkout cro branch AND start OpenKore
+- git clone https://github.com/yon2kong/openkore.git && cd openkore
+- git checkout cro
+- start openkore and check Poseidon's output.
 
 ![image](https://github.com/yon2kong/Poseidon/blob/master/doc/poseidon3.png)
