@@ -10,7 +10,7 @@ Poseidon server only for openkore-cro
 ![image](https://github.com/yon2kong/Poseidon/blob/master/doc/config.png)
 
 ## STEP 3 - Run Poseidon in your VM or VPS
-- ./poseidon.pl --char-server=\<YOUR VM IP:6900\> --map-server=\<YOUR VM IP:6900\>
+- perl src/poseidon.pl --char-server=\<YOUR VM IP:6900\> --map-server=\<YOUR VM IP:6900\>
 
 ## STEP 4 - Make poseidon.xml AND start Ragnarok Client (Ragexe)
 - http://openkore.com/index.php/Poseidon
