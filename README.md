@@ -14,6 +14,9 @@ Poseidon server only for openkore-cro
 
 ## STEP 4 - Make poseidon.xml AND start Ragnarok Client (Ragexe)
 - http://openkore.com/index.php/Poseidon
+
+![image](https://github.com/yon2kong/Poseidon/blob/master/doc/poseidon.xml.png)
+
 - Check Poseidon's output.
 
 ![image](https://github.com/yon2kong/Poseidon/blob/master/doc/poseidon2.png)
