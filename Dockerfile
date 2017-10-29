@@ -13,4 +13,7 @@ ADD . /app/poseidon
 
 EXPOSE 6900
 
-CMD perl src/poseidon.pl --char-server=127.0.0.1:6900 --map-server=127.0.0.1:6900
+ENV CHAR_SERVER 127.0.0.1:6900
+ENV MAP_SERVER 127.0.0.1:6900
+
+CMD perl src/poseidon.pl --char-server=$CHAR_SERVER --map-server=$MAP_SERVER
