@@ -32,6 +32,8 @@ GetOptions(
 ragnarok_server::init($ragnarok_port);
 query_server::init($query_port);
 
+printf "Poseidon initialized.\n";
+
 while (1) {
 	ragnarok_server::loop(0);
 	query_server::loop(0.1);
