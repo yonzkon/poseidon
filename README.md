@@ -1,7 +1,7 @@
 # Poseidon
 Poseidon server only for openkore-cro
 
-# steps to use openkore-cro and Poseidon
+# Steps to run openkore-cro and Poseidon
 
 ## STEP 1 - Run Poseidon in VM or VPS or DOCKER or WSL
 - perl src/poseidon.pl --char-server=\<YOUR VM IP:6900\> --map-server=\<YOUR VM IP:6900\>
@@ -18,7 +18,7 @@ Poseidon server only for openkore-cro
 ## STEP 3 - Capture the login password which is encrypted in rijndael (32 bytes)
 ![image](https://github.com/yon2kong/Poseidon/blob/master/doc/password.png)
 
-## STEP 4 - Config your control/config.txt
+## STEP 4 - Modify control/config.txt
 - password \<CAPTURED LOGIN PASSWORD\>
 - poseidonServer \<YOUR VM IP\>
 - gameGuard 1
