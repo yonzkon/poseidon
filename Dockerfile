@@ -2,7 +2,7 @@ FROM base/archlinux:latest
 
 #RUN sed -ie 's/kernel.org/ustc.edu.cn/' /etc/pacman.d/mirrorlist
 RUN pacman -Syu --noconfirm
-RUN pacman -S --needed --noconfirm vim git gcc perl python2
+RUN pacman -S --needed --noconfirm vi git perl
 
 RUN git clone https://github.com/yon2kong/mss.git /root/.mss
 RUN ln -sf .mss/etc/.bash_profile /root/.bash_profile
