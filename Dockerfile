@@ -8,11 +8,9 @@ RUN git clone https://github.com/yon2kong/mss.git /root/.mss
 RUN ln -sf .mss/etc/.bash_profile /root/.bash_profile
 RUN ln -sf .mss/etc/.bash_profile /root/.bashrc
 
-RUN git clone https://github.com/yon2kong/poseidon.git /root/poseidon
-
-WORKDIR /root
-#ADD . /root
+WORKDIR /app/poseidon
+ADD . /app/poseidon
 
 EXPOSE 6900
 
-CMD perl poseidon/src/poseidon.pl --char-server=127.0.0.1:6900 --map-server=127.0.0.1:6900
+CMD perl src/poseidon.pl --char-server=127.0.0.1:6900 --map-server=127.0.0.1:6900
